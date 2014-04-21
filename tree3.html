@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tree Using Olympic Data</title>
+        <link rel="stylesheet" href="dist/themes/default/style.min.css" />
+        <style>
+		html, body { background:#ebebeb; font-size:10px; font-family:Verdana; margin:0; padding:0; }
+		#container { min-width:320px; margin:0px auto 0 auto; background:white; border-radius:0px; padding:0px; overflow:hidden; }
+		#tree { float:left; min-width:319px; border-right:1px solid silver; overflow:auto; padding:0px 0; }
+		#data { margin-left:320px; }
+		#data textarea { margin:0; padding:0; height:100%; width:100%; border:0; background:white; display:block; line-height:18px; }
+		#data, #code { font: normal normal normal 12px/18px 'Consolas', monospace !important; }
+		</style>
+    </head>
+    <body>
+        <div id="container">
+            <div id="tree">  </div>
+            <div id="data">
+				<div class="content code" style="display:none;"><textarea id="code" readonly="readonly"></textarea></div>
+				<div class="content folder" style="display:none;"></div>
+				<div class="content image" style="display:none; position:relative;"><img src="" alt="" style="display:block; position:absolute; left:50%; top:50%; padding:0; max-height:90%; max-width:90%;" /></div>
+				<div class="content default" style="text-align:center;">Select a node from the tree.</div>
+			</div>
+        </div>
+        <script src="js/jquery.js"></script>
+        <script src="dist/jstree.min.js"></script>
+        <script type="text/javascript">    
+$(document).ready(function(){
+    $(window).resize(function () {
+				var h = Math.max($(window).height() - 0, 420);
+				$('#container, #data, #tree, #data .content').height(h).filter('.default').css('lineHeight', h + 'px');
+			}).resize();
+    
+        $('#tree').jstree({
+           'plugins' : ['dnd', 'wholerow'],
+            'core' : {
+                'data' : {
+                    'dataType': 'JSON',
+                    'type':'GET',
+                    'url' : function (node) {
+                        var parentText = "";
+                        if(node.parent != "#") {
+                            parentText = $("#"+node.parent+" a:first").text();
+                        }
+                        if(node.id === '#') {
+                           return 'getOlympicData.php?directive=getDates';
+                        } 
+                        else if(node.text == "Summer" || node.text == "Winter") {
+                           //console.log(node);
+                            //console.log('getOlympicData.php?directive=getSeason&year='+node.parent.text+'&season='+node.text);
+                           return 'getOlympicData.php?directive=getEvents&year='+node.parent+'&season='+node.text;    
+                        } 
+                        else if(parentText == "Summer" || parentText == "Winter") {
+                            var whatever = "#"+node.id+":first"; 
+                            var theYear = $("#"+node.id+":first").parent().parent().parent().parent().attr('id');
+                            
+                           return 'getOlympicData.php?directive=getAthletes&year='+theYear+'&season='+parentText+'&event='+encodeURI(node.text);
+                        } 
+                        else  {
+                           return 'getOlympicData.php?directive=getSeason&year='+node.text;    
+                        }
+                    },
+                    'data' : function (node) {
+                        
+                        //return { 'text' : node.text };
+                    }
+                }
+            }
+        }).bind("select_node.jstree", function (e, data) {
+   
+     alert(this);
+   
+ });;
+//$("#tree > ul > li > a > ul > li > a > ul > li > a > ul > li > a > ul > li > a").click(function() { 
+$("#tree > ul > li > > ul > li > ul > li > ul > li > ul > li > a").click(function() {
+  alert(this); 
+});
+    
+function getAthletesMainInfo(year, season, event, athlete) {
+    $.getJSON( "getAthletes.php?directive=getAthlete&year="+year+"&season="+season+"&event="+encodeURI(event)+"&athlete="+encodeURI(athlete), function( ) {
+      })
+      .done(function(data) {
+          //Athlete's names are coming through as Lastname, Firstname
+          //Change them around here and...
+          //Some athletes are single named people like soccer players
+          //Check if a comma exists and if not, just use the single name
+          
+          var rawName = new Array();
+          var realName = ""
+
+          //Create the div string using json notation
+          //alert(data);
+          var ct = 0;
+          liString = "";
+        
+              
+//Necessary because some people, such as soccer/football players have a single name              
+                if(data[ct].Athlete.indexOf(',') > -1) { 
+                    rawName = data[ct].Athlete.split(',');
+                    realName = rawName[1]+" "+rawName[0];
+                }
+                else {
+                    realName = data[ct].Athlete;
+                }
+              
+              if(data[ct].Gender == "Men"){
+                    headGraphic = "img/man.gif";
+                }
+            else{
+                    headGraphic = "img/woman.gif";
+            }
+                liString = "<ul><li><p><img src='"+headGraphic+"' height='125' width='125' /></p><div class='info'><h3>"+realName+"</h3>History:<br/>Won a "+data[ct].Medal+" Medal in "+data[ct].Event+" for "+data[ct].Country+" in the "+data[ct].Edition+" "+data[ct].Season+" games.</div></li></ul>";
+                $('#data').append(liString);
+        
+  })
+  .fail(function() {
+    console.log("We got a possible situation down here...");
+  })
+  .always(function() {
+      //Could add something here.
+  });
+     
+}
+// END READY FUNCTION             
+ });   
+						
+</script>
+    </body>
+</html>

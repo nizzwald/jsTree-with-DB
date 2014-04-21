@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Tree Using Olympic Data</title>
+        <link rel="stylesheet" href="dist/themes/default/style.min.css" />
+    </head>
+    <body>
+        <div id="mainArea">
+            <div id="olympicData">  </div>
+        </div>
+        <script src="js/jquery.js"></script>
+        <script src="dist/jstree.min.js"></script>
+        <script type="text/javascript">    
+         $(document).ready(function(){
+							$('#olympicData').jstree({
+                                "plugins" : ["types"],
+								'core' : {
+									'data' : {
+                                        'dataType': 'JSON',
+										'url' : function (node) {
+                                            if(node.id === '#') {
+                                               return 'getOlympicData.php?directive=getDates';
+                                            }
+                                            
+                                            else {
+                                               return 'getOlympicData.php?directive=getSeason&year='+node.text;    
+                                            } 
+                                            /*
+                                            else if(node.olympicEvent) {
+                                               return 'getOlympicData.php?directive=getEvents&year=1952&season='+node.text;
+                                            } */
+                                        },
+                                        'data' : function (node) {
+                                            return { 'text' : node.text };
+                                        }
+									}
+								}
+							});
+$("#olympicData").bind("select_node.jstree", function(evt, data){
+    
+    console.log(data);
+   /*
+    var topParent = data.node.parent; 
+    if(topParent != "#") {
+      //console.log("Parent val= "+$("#"+topParent+" a:first").text());
+      retrieveMoreNodes("getOlympicData.php?directive=getEvents&year="+$("#"+topParent+" a:first").text()+"&season="+data.node.text, data.node.id);         
+     //console.log("getOlympicData.php?directive=getEvents&year="+$("#"+topParent+" a:first").text()+"&season="+data.node.text);     
+ 
+    }
+    //console.log("This: "+data.node.text);
+    */
+
+    }
+);
+             
+function retrieveMoreNodes(loadURL, parentID) {
+    $.ajax({
+        async : true,
+        type : "GET",
+        url : loadURL,
+        dataType : "json",    
+
+        success : function(json) {
+            //console.log("Should output the Events JSON: "+json);
+            createChildNodes(json, parentID);
+        },    
+        error : function(xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+} 
+             
+function createChildNodes(json, parentID){
+  $("#olympicData").jstree({ 'core' : {
+    'data' : json
+        }
+    });
+}
+             
+             
+// END READY FUNCTION             
+ });   
+						
+</script>
+    </body>
+</html>

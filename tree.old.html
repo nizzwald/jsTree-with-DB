@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tree Using Olympic Data</title>
+        <link rel="stylesheet" href="tree/dist/themes/default/style.min.css" />
+    </head>
+    <body>
+        <div id="mainArea">
+            <div id="jstree_demo_div">
+                <ul id="olympicTreeTrunk">
+                </ul>
+            </div>
+        </div>
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script src="tree/dist/jstree.min.js"></script>
+        <script>
+        $(document).ready(function(){
+            var tree = "";
+          $(function () { 
+                tree = $('#jstree_demo_div').jstree(); 
+            });
+            
+            $('#jstree_demo_div').on("changed.jstree", function (e, data) {
+                console.log(data.selected);
+            });
+            
+            $.getJSON( "getOlympicData.php?directive=getDates", function( ) {
+      })
+      .done(function(data) {
+          //Athlete's names are coming through as Lastname, Firstname
+          //Change them around here and...
+          //Some athletes are single named people like soccer players
+          //Check if a comma exists and if not, just use the single name
+          
+          var rawName = new Array();
+          var realName = ""
+
+          //Create the div string using json notation
+          //alert(data);
+          var ct = 0;
+          liString = "";
+          $.each( data, function( key, value ) {             
+                liString = "<li>"+data[ct].Edition+"</li>";
+                $('.vakata-context').append(liString);
+                ct++;
+            });
+          tree.jstree("refresh");
+          data = "";
+  })
+  .fail(function() {
+    console.log("We got a possible situation down here...");
+  })
+  .always(function() {
+      //Could add something here.
+  });
+            
+            
+            
+            
+            
+        });    
+            
+        </script>
+    </body>
+</html>

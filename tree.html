@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Tree Using Olympic Data</title>
+        <link rel="stylesheet" href="tree/dist/themes/default/style.min.css" />
+    </head>
+    <body>
+        <div id="mainArea">
+            <div id="olympicData">
+               
+            </div>
+        </div>
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+        <script src="tree/dist/jstree.min.js"></script>
+        <script type="text/javascript">    
+
+$(function() {
+    $.ajax({
+        async : true,
+        type : "GET",
+        url : "getOlympicData.php?directive=getDates",
+        dataType : "json",    
+
+        success : function(json) {
+            createJSTrees(json);
+        },    
+
+        error : function(xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+});    
+
+function createJSTrees(jsonData) {
+    console.log("This was called and "+jsonData+" was received");
+    $("#olympicData").jstree({ 'core' : {
+    'data' : jsonData
+        },
+        "plugins" : [ "themes", "json_data", "ui" ]
+    });
+} 
+            
+function retrieveMoreNodes(loadURL, ID) {
+    $.ajax({
+        async : true,
+        type : "GET",
+        url : loadURL,
+        dataType : "json",    
+
+        success : function(json) {
+            createJSTrees(addIdToJSON(json, ID));
+        },    
+
+        error : function(xhr, ajaxOptions, thrownError) {
+            alert(xhr.status);
+            alert(thrownError);
+        }
+    });
+}
+            
+function addIdToJSON(jsonData, parentID){
+    var jsonDataNew = new Object;
+    jQuery.each(jsonData, function(i, val) {
+        //Add parentID to object
+        jsonDataNew.parent = parentID;
+        jsonDataNew.text = this.text;
+        jsonDataNew.id = this.id;
+    });
+    
+     return jsonDataNew;
+}
+  
+            
+function createChildren(jsonData) {
+  console.log("createChilren: "+jsonData);
+}
+            
+$("#olympicData").bind("select_node.jstree", function(evt, data){
+    retrieveMoreNodes("getOlympicData.php?directive=getSeason&year="+data.node.text, data.node.id);     
+  }
+);
+ 
+</script>
+    </body>
+</html>
