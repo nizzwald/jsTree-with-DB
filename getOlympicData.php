@@ -65,6 +65,18 @@ else if($doWhat == "getAthletes") {
 }  
 //getAthletesDetails 
     else if($doWhat == "getAthleteDetails") {
+    if(empty($_GET['athlete'])==FALSE) {
+      $athlete = $_GET['athlete'];
+      $sql="SELECT Athlete, Medal, Country, Gender, Event, Edition, Season FROM main_olympic_data where Athlete='$athlete'";
+   }
+   else{
+        echo "Error: missing data!";
+    }
+} 
+    else {
+    echo "Incorrect directive.  Please check.";
+    }
+        /*
     if(empty($_GET['year'])==FALSE || empty($_GET['season'])==FALSE || empty($_GET['season'])==FALSE || empty($_GET['athlete'])==FALSE) {
         $year = $_GET['year'];
         $season = $_GET['season'];
@@ -76,10 +88,7 @@ else if($doWhat == "getAthletes") {
         echo "Error: missing data!";
     }
 } 
-    else {
-    echo "Incorrect directive.  Please check.";
-    }
-
+*/
     $result = mysqli_query($con,$sql);
     $data = array();
     $returnedDataString = array();
@@ -92,33 +101,45 @@ else if($doWhat == "getAthletes") {
             $theEditions['id'] = $row['Edition'];
             $theEditions['attr'] = "{'node_type':'date'}";
             $theEditions['children'] = true;
+            $theEditions['type'] = "Date";
             $returnedDataString[] = $theEditions; 
         }
         else if($doWhat == "getSeason") {
             $theSeasons['text'] = $row['Season'];
             $theSeasons['children'] = true;
             $theSeasons['attr'] = "{'node_type':'date'}";
+            $theSeasons['type'] = "Season";
             $returnedDataString[] = $theSeasons;
         }
         else if($doWhat == "getEvents") {
             $theEvents['text'] = $row['Event'];
             $theEvents['children'] = true;
+            $theEvents['type'] = "Event";
             $returnedDataString[] = $theEvents;
         }
         else if($doWhat == "getAthletes") {
             if(empty($row['Athlete']) == false || $row['Athlete'] = "" || $row['Athlete'] = null || $row['Athlete'] = 0) {
                 $theAthletes['text'] = $row['Athlete'];  
                 $theAthletes['children'] = false;
+                $theAthletes['type'] = "Athlete";
             }
             else {
                 $theAthletes['text'] = "Athelete Unknown";  
-                $theAthletes['children'] = false;   
+                $theAthletes['children'] = false; 
+                $theAthletes['type'] = "Athlete";
             }
             $returnedDataString[] = $theAthletes;
         
         }
         else if($doWhat == "getAthleteDetails") {
-        
+            $athleteDetails['Athlete'] = $row['Athlete'];
+            $athleteDetails['Medal'] = $row['Medal'];
+            $athleteDetails['Country'] = $row['Country'];
+            $athleteDetails['Gender'] = $row['Gender'];
+            $athleteDetails['Event'] = $row['Event'];
+            $athleteDetails['Edition'] = $row['Edition'];
+            $athleteDetails['Season'] = $row['Season']; 
+            $returnedDataString[] = $athleteDetails;
         }
     }
 //print_r($arr); 
